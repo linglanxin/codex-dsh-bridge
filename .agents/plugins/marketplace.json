@@ -1,0 +1,12 @@
+{
+  "name": "dsh-desktop-bridge",
+  "interface": { "displayName": "DSH Desktop Bridge" },
+  "plugins": [
+    {
+      "name": "dsh-desktop",
+      "source": { "source": "local", "path": "./plugins/dsh-desktop" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_USE" },
+      "category": "Developer Tools"
+    }
+  ]
+}

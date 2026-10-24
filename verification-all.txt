@@ -1,0 +1,41 @@
+✔ adapter uses official Loader, AgentLoop, Preset and configured model; follow-ups share session (175.4024ms)
+✔ supervised tools register in the real AgentLoop, block at checkpoint and continue after response (28.7801ms)
+✔ unallowlisted tools are denied by the real executor and allowed tools run (25.9539ms)
+✔ real AgentLoop cancellation drains before reporting cancellation (21.2423ms)
+✔ Desktop adapter refuses a non-Desktop host (1.9813ms)
+✔ real model failures report failure without exposing provider secrets (16.1104ms)
+✔ built plugin activates in a simulated Desktop profile and cleans up its socket on unload (10020.0406ms)
+✔ monotonic allowlist survives pre-execute short circuit and does not restrict ordinary Desktop agents (32.1405ms)
+✔ cancellation of an allowed in-flight tool waits for its actual quiescence (41.4751ms)
+✔ task deadline cancels the official AgentLoop request and retains terminal result (3534.6024ms)
+✔ official metadata accepts complete supported pairs and rejects mixed or unresolved packages (45.6136ms)
+✔ question blocks writes, binds IDs, rejects duplicate replies, and requires independent acceptance (104.8791ms)
+✔ checkpoint pauses, requires exact fingerprint, then resumes reviewed work (63.1916ms)
+✔ cancellation releases blocking question and does not fabricate completion (54.2333ms)
+✔ restart preserves questions and request deduplication without executing them again (49.0931ms)
+✔ workspace escapes are rejected (41.4934ms)
+✔ session follow-ups preserve context handle and deduplicate request UUIDs (4333.8312ms)
+✔ running sessions reject concurrent input; cancellation waits for quiescence (4025.5172ms)
+✔ timeouts request cooperative stop and report timed_out after execution stops (3865.724ms)
+✔ bounds prompts, output, sessions and task retention; never forwards raw errors (3110.6193ms)
+✔ closing cancels owned work and preserves workspace for review (2818.8978ms)
+✔ output limits preserve UTF-8 text at byte boundaries (0.4487ms)
+✔ shutdown waits for in-flight agent creation and disposes its late handle (2701.609ms)
+✔ concurrent close joins one cancellation and disposal (2576.1672ms)
+✔ built MCP stdio exchanges official protocol with a separate client and existing bridge (8456.0084ms)
+✔ relocated portable plugin works without node_modules and can complete setup after MCP startup (13217.4408ms)
+✔ read-only setup inspection leaves files absent and reports exact commands without credentials (11.4084ms)
+✔ explicit setup creates default-deny config and repeat setup preserves the authentication token (4294.6376ms)
+✔ Unix socket authenticates independently, refuses browsers, unknown versions and oversize input (5142.6953ms)
+✔ separate local clients share owned sessions and reconnect without launching DSH (4988.5909ms)
+✔ private config rejects readable tokens, symlinks, unsafe roots and policy widening (5693.0359ms)
+✔ missing Desktop returns explicit unavailable, never starts a host process (2832.8323ms)
+✔ Git worktrees isolate main checkout and preserve changes on session close (7590.239ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 23966.3282

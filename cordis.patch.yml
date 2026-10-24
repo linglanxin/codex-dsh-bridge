@@ -1,0 +1,5 @@
+- insert:
+    - id: desktop-mcp-bridge
+      name: dsh-desktop-mcp-bridge
+      disabled: !!js "ctx.get('profileContext')?.name !== 'desktop'"
+      config: {}

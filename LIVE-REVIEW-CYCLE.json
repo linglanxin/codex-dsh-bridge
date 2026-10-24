@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "check": "actual draft inspected and rejected with concrete revision",
+      "passed": true,
+      "runtimeSessionId": "mcp-077b1de4-a835-4f5a-80e5-e226edfe3ba6"
+    },
+    {
+      "check": "same-session correction independently verified and accepted",
+      "passed": true,
+      "cwd": "F:\\codex\\dsh-bridge-work\\b833d418-6d99-4e64-975d-200f989ce925"
+    }
+  ],
+  "jobId": "b833d418-6d99-4e64-975d-200f989ce925"
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "dsh-desktop",
+  "version": "0.2.1-rc3-windows.3",
+  "description": "Delegate to an already running official DeepSeek Harness Desktop through a private local bridge.",
+  "author": {
+    "name": "DSH Desktop MCP Bridge contributors"
+  },
+  "repository": "https://github.com/Cryocell77/codex-deepseek-harness-desktop-bridge",
+  "license": "MIT",
+  "extensions": {
+    "com.openai": {
+      "requires_local_executor": true,
+      "interface": {
+        "displayName": "DSH Desktop Bridge",
+        "shortDescription": "Delegate to your running DSH Desktop.",
+        "longDescription": "Delegate to the running official DSH Desktop in isolated task workspaces. Includes the MCP server, setup helper and Desktop adapter. Supports DSH 0.2.0-rc.2 with Cordis 4.0.4, or DSH 0.2.1-rc.1 / 0.2.1-rc.2 with Cordis 4.0.5.",
+        "developerName": "DSH Desktop MCP Bridge contributors",
+        "category": "Developer Tools",
+        "brandColor": "#153448",
+        "composerIcon": "./assets/icon.svg",
+        "logo": "./assets/icon.svg",
+        "capabilities": [
+          "Existing Desktop runtime",
+          "Isolated task workspaces",
+          "Explicit local permissions"
+        ],
+        "defaultPrompt": "Use my running DSH Desktop for this task. Check setup and connection first, delegate in an isolated workspace, then review the result and changes."
+      }
+    }
+  }
+}

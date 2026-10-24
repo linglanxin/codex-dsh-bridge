@@ -1,0 +1,35 @@
+{
+  "time": "2026-10-24T16:40:54.872Z",
+  "checks": [
+    {
+      "check": "MCP discovery",
+      "passed": true,
+      "tools": 19
+    },
+    {
+      "check": "existing Desktop runtime",
+      "passed": true,
+      "adapter": "dsh-v0.2.1-rc.3"
+    },
+    {
+      "check": "request deduplication",
+      "passed": true
+    },
+    {
+      "check": "blocking question and bound answer",
+      "passed": true,
+      "questionId": "3130d848-3a1d-4eef-852a-631a541a6047"
+    },
+    {
+      "check": "plan checkpoint reviewed",
+      "passed": true
+    },
+    {
+      "check": "actual artifact verified and final acceptance recorded",
+      "passed": true,
+      "cwd": "F:\\codex\\dsh-bridge-work\\fda36dd9-b912-4fc1-b5aa-d1b593bc780b"
+    }
+  ],
+  "jobId": "fda36dd9-b912-4fc1-b5aa-d1b593bc780b",
+  "status": "passed"
+}

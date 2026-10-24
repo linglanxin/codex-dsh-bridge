@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Desktop MCP Bridge (unofficial)",
+    "description": "Opt-in local MCP delegation to this running Desktop runtime; tool access is controlled by a private local config."
+  }
+}

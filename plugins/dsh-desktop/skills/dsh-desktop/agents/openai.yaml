@@ -1,0 +1,4 @@
+interface:
+  display_name: 'DSH Desktop Bridge'
+  short_description: 'Delegate to the existing DSH Desktop runtime'
+  default_prompt: 'Use $dsh-desktop to check my Desktop bridge, delegate this task in an isolated workspace, and review the result.'

@@ -1,0 +1,4 @@
+# Add to the Desktop profile patch after installing the bundle.
+- id: desktop-mcp-bridge
+  config:
+    configFile: /Users/you/.dsh-mcp-state/config.json

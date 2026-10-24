@@ -1,0 +1,6 @@
+# Replace all paths. Keep the token out of Codex config; the local server reads its private file.
+[mcp_servers.dsh_desktop]
+command = "/absolute/path/to/node"
+args = ["/absolute/path/to/bridge/dist/cli.js", "stdio", "--config", "/Users/you/.dsh-mcp-state/config.json"]
+startup_timeout_sec = 10
+tool_timeout_sec = 60
