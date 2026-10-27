@@ -13,6 +13,9 @@ DSH 官方目前没有统一的插件上传中心。官方推荐为仓库添加 
 
 本次市场版本明确限定 **DSH Desktop 0.2.1-rc.3 / Cordis 4.0.5 / Schemastery 3.18.5，Windows，Node.js 22.19+**。其他版本不要强行跳过兼容性检查。历史实机验证使用 windows.3 / windows.4；windows.5 在同一受控运行时完成自动检查和独立安装验证，不宣称做过新的真实模型联调。
 
+## 当前验证差异
+
+本机使用 Node.js **24.19.0**，37 项检查通过。GitHub Windows runner 使用 **24.22.1** 时，35 项通过、2 项 MCP stdio 集成检查超时，原因尚未定位：[检查记录](https://github.com/linglanxin/codex-dsh-bridge/actions/runs/40529728931)。目前保留预发布状态；优先使用已验证的 Node.js 24.19.0。新电脑上的实际 DSH 连接仍需运行 doctor 确认。
 ## 从市场索引安装
 
 在支持自定义索引的 DSH 市场“索引源”中添加上面的 `market-index.json` URL，再选择此插件的 `next` 版本。索引使用确切 Git 提交，仓库包含构建产物，安装无需运行构建脚本。
