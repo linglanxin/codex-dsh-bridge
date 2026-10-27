@@ -151,7 +151,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-===== zod@4.4.3 (MIT) =====
+===== zod@4.6.7 (MIT) =====
 MIT License
 
 Copyright (c) 2025 Colin McDonnell

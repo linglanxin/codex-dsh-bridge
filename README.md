@@ -4,6 +4,10 @@
 
 这是基于 [DSH Desktop MCP Bridge](https://github.com/Cryocell77/deepseek-harness-desktop-mcp-bridge) 的实验性 Windows 适配与监督流程扩展。保留上游 MIT 许可证及第三方归属，与 OpenAI、DeepSeek 无官方隶属关系。
 
+## 安装与市场发现
+
+当前公开预发布版本为 **0.2.1-rc3-windows.5**。安装包、官方格式索引与跨电脑配置步骤见 [市场安装说明](docs/MARKETPLACE.md)。本项目为社区插件；索引可供 DSH 加载，不代表官方审核收录。
+
 ## 已实现
 
 - Windows 命名管道通信与本地认证，连接已运行的 DSH Desktop。
@@ -12,6 +16,7 @@
 - 写入前的计划检查点、执行后的独立验收与退回修改。
 - 成果指纹：验收后的文件变化使旧验收失效。
 - 独立任务目录、限制路径的文件工具及 Windows 状态目录权限检查。
+- 可指定 DSH 工作区名称，桥接创建的会话自动归入该工作区。
 
 ```text
 用户 → Codex → MCP → DSH Desktop 插件
@@ -21,11 +26,12 @@
 
 ## 当前验证范围
 
-本机实测：Windows，DSH Desktop **0.2.1-rc.3**，桥接 **0.2.1-rc3-windows.3**，Cordis 4.0.5，Schemastery 3.18.5。
+本机实测：Windows，DSH Desktop **0.2.1-rc.3**，桥接 **0.2.1-rc3-windows.4**，Cordis 4.0.5，Schemastery 3.18.5。
 
-- 33 项自动检查通过。
+- 37 项自动检查通过（含新增的工作区归属与失败处理检查）。
 - 真实模型完成“提问 → 答复 → 计划审查 → 写文件 → 验收”。
 - 真实模型完成同一会话中的“初稿 → 退回修改 → 复验通过”。
+- DSH 实机创建 `codex自动` 工作区，通过桥接新建会话并核实持久化归属，见 [工作区验证](WORKSPACE-VERIFICATION.json)。此项验证无需调用模型。
 
 详见 [验证结果](验证结果.md)、[兼容性核对](兼容性核对.md) 和两份 `LIVE-*.json` 记录。受控测试与真实模型联调在记录中分别标明；尚未做长期稳定性验证。
 
@@ -38,7 +44,7 @@ npm ci --ignore-scripts
 npm run check
 ```
 
-配置步骤见 [使用说明](使用说明.md)。**当前是按个人电脑部署的首版**：部分入口、技能和联调脚本使用 `F:/codex/...`，迁移到其他电脑前需要调整这些路径；请勿直接照搬上游 macOS 安装步骤。
+公开版本的配置步骤见 [市场安装说明](docs/MARKETPLACE.md)。[本机使用说明](使用说明.md)、协作技能和历史联调脚本保留原部署路径作为记录；公开运行入口默认使用当前账号目录。
 
 ## 运行边界
 

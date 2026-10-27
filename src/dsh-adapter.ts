@@ -5,6 +5,7 @@ import type {} from '@deepseek-ai/dsh-agent-preset-registry';
 import type {} from '@deepseek-ai/dsh-tools';
 import { createUserMessage } from '@deepseek-ai/dsh-llm';
 import type { SessionId } from '@deepseek-ai/dsh-session';
+import type { Workspace } from '@deepseek-ai/dsh-workspace';
 import { randomUUID } from 'node:crypto';
 import type { DesktopRuntime, RuntimeSession, RunResult, RuntimeHooks } from './runtime.ts';
 import { boundedText } from './manager.ts';
@@ -20,6 +21,7 @@ export class DshDesktopRuntime implements DesktopRuntime {
     private ctx: Context,
     private allowedTools: readonly string[],
     private maxOutputBytes: number,
+    private workspace?: Pick<Workspace, 'path' | 'attachSession'>,
   ) {}
   async create(cwd: string, preset: string, hooks?: RuntimeHooks): Promise<RuntimeSession> {
     const localTools = hooks ? ['bridge_ask_codex', 'bridge_checkpoint', 'bridge_read_file', 'bridge_write_file', 'bridge_list_files'] : [];
@@ -28,7 +30,9 @@ export class DshDesktopRuntime implements DesktopRuntime {
     const resolved = await this.ctx.agentPresets.resolve(preset);
     const handle = await this.ctx.agents.create({
       sessionId: `mcp-${randomUUID()}` as SessionId,
-      meta: { cwd, agentPreset: resolved.id },
+      // Desktop membership uses the immutable header cwd. File hooks retain
+      // their independent per-task directory and never operate on this root.
+      meta: { cwd: this.workspace?.path ?? cwd, agentPreset: resolved.id },
       agentOptions: { ...selection },
       setup: async (agentCtx, agent) => {
         // The official monotonic guard survives a pre-execute listener returning allow
@@ -82,6 +86,12 @@ export class DshDesktopRuntime implements DesktopRuntime {
         }
       },
     });
+    try {
+      await this.workspace?.attachSession(handle.agent.id);
+    } catch (error) {
+      await handle.dispose();
+      throw error;
+    }
     return new DshSession(handle, this.maxOutputBytes);
   }
 }

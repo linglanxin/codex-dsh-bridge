@@ -5,6 +5,15 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DESKTOP_TARGET, CORDIS_TARGET, SUPPORTED_DESKTOPS } from '../src/version.ts';
 import { prepareSetup, setupInfo, resolveConfigFile } from '../src/setup.ts';
+import { configSchema } from '../src/config.ts';
+import { fixture } from './helpers.ts';
+
+test('named workspaces accept a title and reject native tools that would use the shared root', async t => {
+  const f = await fixture(); t.after(() => f.cleanup());
+  assert.equal(configSchema.parse({ ...f.config, workspaceTitle: 'codex自动' }).workspaceTitle, 'codex自动');
+  assert.throws(() => configSchema.parse({ ...f.config, workspaceTitle: 'codex自动', allowedTools: ['read_file'] }), /task-scoped/);
+  assert.throws(() => configSchema.parse({ ...f.config, workspaceTitle: ' ' }));
+});
 test('read-only setup inspection leaves files absent and reports exact commands without credentials', async (t) => {
   const root = await mkdtemp(join(await realpath(tmpdir()), 'dshsetup-'));
   t.after(() => rm(root, { recursive: true, force: true }));

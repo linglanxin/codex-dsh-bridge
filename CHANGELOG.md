@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1-rc3-windows.5 — 2026-10-27
+
+- Publish the Windows supervised workflow and named workspace routing.
+- Declare the tested DSH 0.2.1-rc.3 market compatibility explicitly.
+- Use account-local configuration discovery instead of a developer's drive path.
+- Ship prebuilt entry points for installation without build hooks.
+- Provide a commit-pinned index in the official DSH market format.
+- Retain upstream attribution, private state, restricted file tools and independent reviews.
+
 ## 0.2.1-rc2 — 2026-10-18
 
 - Add support for DSH Desktop 0.2.1-rc.2 / Cordis 4.0.5 / Schemastery 3.18.5.

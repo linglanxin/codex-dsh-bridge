@@ -1,12 +1,12 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "dsh-desktop",
-  "version": "0.2.1-rc3-windows.3",
+  "version": "0.2.1-rc3-windows.5",
   "description": "Delegate to an already running official DeepSeek Harness Desktop through a private local bridge.",
   "author": {
     "name": "DSH Desktop MCP Bridge contributors"
   },
-  "repository": "https://github.com/Cryocell77/codex-deepseek-harness-desktop-bridge",
+  "repository": "https://github.com/linglanxin/codex-dsh-bridge",
   "license": "MIT",
   "extensions": {
     "com.openai": {
@@ -14,7 +14,7 @@
       "interface": {
         "displayName": "DSH Desktop Bridge",
         "shortDescription": "Delegate to your running DSH Desktop.",
-        "longDescription": "Delegate to the running official DSH Desktop in isolated task workspaces. Includes the MCP server, setup helper and Desktop adapter. Supports DSH 0.2.0-rc.2 with Cordis 4.0.4, or DSH 0.2.1-rc.1 / 0.2.1-rc.2 with Cordis 4.0.5.",
+        "longDescription": "Delegate to the running official DSH Desktop in isolated task workspaces. Includes the MCP server, setup helper and Desktop adapter. Supports DSH 0.2.0-rc.2 with Cordis 4.0.4, or DSH 0.2.1-rc.1 / 0.2.1-rc.2 / 0.2.1-rc.3 with Cordis 4.0.5.",
         "developerName": "DSH Desktop MCP Bridge contributors",
         "category": "Developer Tools",
         "brandColor": "#153448",

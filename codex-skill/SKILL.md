@@ -11,6 +11,8 @@ Codex 是用户沟通、决策与验收的负责人。DSH 通过当前正在运�
 
 优先使用 `dsh_desktop` MCP 的 `dsh_job_*` 工具。先调用 `dsh_connection_info`。本机配置：`F:/codex/dsh-bridge-state/config.json`。
 
+本机桥接指定 DSH 工作区为 `codex自动`，根目录 `F:/codex/dsh-bridge-work`。之后通过此桥接的新任务和恢复 worker 都应归入该工作区，成果继续放在独立任务子目录。先确认连接信息中的 `workspaceTitle` 为 `codex自动`；不一致时修复配置与插件加载，不能声称已正确归属。不迁移历史会话，不为普通任务临时改成其他工作区。
+
 如果本轮工具列表尚未加载，可用已安装的同一桥接客户端，不需要重装：
 
 `node F:/codex/2026-10-24/codex-dsh-codex-dsh-dsh-codex/outputs/codex-dsh-bridge/dist/call.js <operation> <input-json-file>`

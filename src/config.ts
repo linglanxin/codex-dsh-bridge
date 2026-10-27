@@ -26,6 +26,7 @@ export const configSchema = z
     version: z.literal(1),
     stateDir: z.string(),
     workspaceRoot: z.string(),
+    workspaceTitle: z.string().trim().min(1).max(128).optional(),
     allowedTools: z.array(z.string().min(1).max(128)).max(100),
     allowedPresets: z.array(z.string().min(1).max(128)).min(1).max(20),
     repositories: z.array(z.string()).max(20),
@@ -35,7 +36,11 @@ export const configSchema = z
     maxOutputBytes: z.number().int().min(128).max(1048576),
     taskTimeoutMs: z.number().int().min(100).max(3600000),
   })
-  .strict();
+  .strict()
+  .refine(config => !config.workspaceTitle || config.allowedTools.length === 0, {
+    message: 'Named Desktop workspaces require task-scoped bridge tools only (allowedTools must be empty).',
+    path: ['allowedTools'],
+  });
 export type BridgeConfig = z.infer<typeof configSchema>;
 export function contains(parent: string, child: string): boolean {
   const r = relative(parent, child);

@@ -1,0 +1,21 @@
+{
+  "version": "0.2.1-rc3-windows.5",
+  "date": "2026-10-27",
+  "automatedChecks": {
+    "passed": 37,
+    "failed": 0
+  },
+  "productionInstall": "passed with lifecycle scripts disabled",
+  "privateConfigurationSetup": "passed in an isolated verification directory",
+  "productionDependencyVulnerabilities": 0,
+  "developmentDependencies": "Pinned historical DSH test dependencies retain upstream audit warnings; they are not shipped in the install archive.",
+  "archiveContainsRequiredRuntimeFiles": true,
+  "archiveContainsPrivateRuntimeState": false,
+  "newLiveModelTest": false,
+  "historicalLiveVerification": [
+    "LIVE-VERIFICATION.json",
+    "LIVE-REVIEW-CYCLE.json",
+    "WORKSPACE-VERIFICATION.json"
+  ],
+  "officialMarketEndorsement": false
+}

@@ -56,6 +56,7 @@ export class TaskManager {
       allowedTools: this.config.allowedTools,
       allowedPresets: this.config.allowedPresets,
       workspaceRoot: this.config.workspaceRoot,
+      workspaceTitle: this.config.workspaceTitle,
       sandbox: false,
     };
   }

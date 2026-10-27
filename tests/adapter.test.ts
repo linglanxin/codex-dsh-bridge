@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Context } from '@deepseek-ai/cordis';
 import { PluginPackages } from '@deepseek-ai/dsh-app-boot';
 import { randomUUID } from 'node:crypto';
-import { lstat, readFile } from 'node:fs/promises';
+import { lstat, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { SUPPORTED_DESKTOPS } from '../src/version.ts';
 import Loader from '@deepseek-ai/cordis-plugin-loader';
@@ -134,6 +134,83 @@ test('adapter uses official Loader, AgentLoop, Preset and configured model; foll
   assert.match(JSON.stringify(events), /desktop-mcp-bridge/);
   await session.dispose();
   assert.equal(f.ctx.agents.get(session.id as Parameters<typeof f.ctx.agents.get>[0]), undefined);
+});
+
+test('named workspace attaches every new worker before return while task file hooks remain scoped', async t => {
+  const f = await compose(['bridge', 'text']);
+  t.after(() => f.ctx.fiber.dispose());
+  const attached: string[] = [];
+  const workspace = {
+    path: '/group-root',
+    async attachSession(id: Parameters<typeof f.ctx.agents.get>[0]) {
+      const agent = f.ctx.agents.get(id)!;
+      assert.equal(agent.session.header.cwd, '/group-root');
+      attached.push(id);
+    },
+  };
+  const runtime = new DshDesktopRuntime(f.ctx, [], 1024, workspace);
+  const controls: string[] = [];
+  const a = await runtime.create('/group-root/task-a', 'standard', {
+    canExecute: () => true, event() {},
+    control: async name => { controls.push(name); return { approved: true }; },
+  });
+  const b = await runtime.create('/group-root/task-b', 'standard');
+  assert.deepEqual(attached, [a.id, b.id]);
+  assert.equal((await a.run('checkpoint')).outcome, 'completed');
+  assert.deepEqual(controls, ['bridge_checkpoint']);
+  await a.dispose(); await b.dispose();
+});
+
+test('workspace attach failure disposes worker and refuses an ungrouped task', async t => {
+  const f = await compose([]);
+  t.after(() => f.ctx.fiber.dispose());
+  let failedId = '';
+  const runtime = new DshDesktopRuntime(f.ctx, [], 1024, {
+    path: '/group-root',
+    async attachSession(id) { failedId = id; throw new Error('membership failed'); },
+  });
+  await assert.rejects(runtime.create('/group-root/task-a', 'standard'), /membership failed/);
+  assert.ok(failedId);
+  assert.equal(f.ctx.agents.get(failedId as Parameters<typeof f.ctx.agents.get>[0]), undefined);
+  assert.equal(f.adapter.requests.length, 0);
+});
+
+test('built plugin registers the configured workspace and routes new bridge sessions into it', async t => {
+  const { fixture } = await import('./helpers.ts');
+  const { BridgeClient } = await import('../src/transport.ts');
+  const f = await compose([]);
+  const local = await fixture();
+  t.after(async () => { await f.ctx.fiber.dispose(); await local.cleanup(); });
+  await writeFile(local.file, JSON.stringify({ ...local.config, workspaceTitle: 'codex自动' }));
+  f.ctx.provide('profileContext', {
+    name: 'desktop', dir: local.root, patchPath: '', installAnchor: '',
+    cwd: local.root, home: local.root, startedBundles: [], overlays: [], telemetryDisabledEnv: undefined,
+  });
+  const attached: string[] = [];
+  let title = 'previous name';
+  f.ctx.provide('workspaceRegistry', {
+    async create(path: string, requested: string) {
+      assert.equal(path, local.config.workspaceRoot);
+      assert.equal(requested, 'codex自动');
+      return {
+        path, get title() { return title; },
+        async setTitle(value: string) { title = value; },
+        async attachSession(id: Parameters<typeof f.ctx.agents.get>[0]) {
+          assert.equal(f.ctx.agents.get(id)!.session.header.cwd, path);
+          attached.push(id);
+        },
+      };
+    },
+  } as unknown as Context['workspaceRegistry']);
+  await f.ctx.loader.create({ name: new URL('../dist/desktop-plugin.js', import.meta.url).href, config: { configFile: local.file } });
+  await f.ctx.loader.await();
+  const client = await BridgeClient.fromConfig(local.file);
+  const info = await client.call('connection_info', {}) as { workspaceTitle: string };
+  assert.equal(info.workspaceTitle, 'codex自动'); assert.equal(title, 'codex自动');
+  const session = await client.call('create_session', {}) as { runtimeSessionId: string; cwd: string };
+  assert.deepEqual(attached, [session.runtimeSessionId]);
+  assert.notEqual(session.cwd, local.config.workspaceRoot);
+  assert.equal(session.cwd.startsWith(local.config.workspaceRoot), true);
 });
 test('supervised tools register in the real AgentLoop, block at checkpoint and continue after response', async t => {
   const f = await compose(['bridge', 'text']); t.after(() => f.ctx.fiber.dispose());

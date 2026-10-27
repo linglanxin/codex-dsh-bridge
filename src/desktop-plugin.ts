@@ -1,5 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis';
 import type {} from '@deepseek-ai/dsh-app-boot';
+import type {} from '@deepseek-ai/dsh-workspace';
 import schema from '@deepseek-ai/schemastery';
 import { configPath, loadConfig } from './config.ts';
 import { DshDesktopRuntime } from './dsh-adapter.ts';
@@ -8,14 +9,6 @@ import { startBridge } from './transport.ts';
 import { fail } from './errors.ts';
 import { Coordinator } from './coordinator.ts';
 import { resolve } from 'node:path';
-import { writeFileSync, existsSync } from 'node:fs';
-import { publicError } from './errors.ts';
-function diagnostic(stage: string, detail?: unknown) {
-  if (process.platform === 'win32' && existsSync('F:/codex/dsh-bridge-state')) {
-    try { writeFileSync('F:/codex/dsh-bridge-state/activation.json', JSON.stringify({ stage, detail, time: new Date().toISOString(), pid: process.pid }), { mode: 0o600 }); } catch {}
-  }
-}
-diagnostic('module-imported');
 import { pathExists, resolveConfigFile } from './setup.ts';
 import { SUPPORTED_DESKTOPS, type DesktopCompatibility } from './version.ts';
 export const name = 'dsh-desktop-mcp-bridge';
@@ -66,11 +59,10 @@ export async function assertCompatible(ctx: Context): Promise<DesktopCompatibili
   return { ...compatible };
 }
 export async function apply(ctx: Context, options: Config = {}): Promise<void> {
-  diagnostic('applying');
-  try { await activate(ctx, options); } catch (error) { diagnostic('failed', publicError(error)); throw error; }
+  await activate(ctx, options);
 }
 async function activate(ctx: Context, options: Config = {}): Promise<void> {
-  const explicit = options.configFile ?? (process.env.DSH_DESKTOP_BRIDGE_CONFIG || (process.platform === 'win32' ? 'F:/codex/dsh-bridge-state/config.json' : undefined));
+  const explicit = options.configFile ?? (process.env.DSH_DESKTOP_BRIDGE_CONFIG || undefined);
   const file = resolve(resolveConfigFile(explicit));
   if (!explicit && !(await pathExists(file))) {
     ctx.logger.warn(
@@ -79,23 +71,32 @@ async function activate(ctx: Context, options: Config = {}): Promise<void> {
     return;
   }
   const compatibility = await assertCompatible(ctx);
-  diagnostic('compatible', compatibility);
   const config = await loadConfig(file);
-  diagnostic('config-loaded');
   if (file !== configPath(config.stateDir)) fail('CONFIG', 'Use canonical configFile path.');
-  const manager = new TaskManager(
-    config,
-    new DshDesktopRuntime(ctx, config.allowedTools, config.maxOutputBytes),
-    compatibility,
-  );
-  const coordinator = new Coordinator(config, new DshDesktopRuntime(ctx, config.allowedTools, config.maxOutputBytes));
-  await ctx.effect(async () => {
-    const stop = await startBridge(config, manager, coordinator);
-    diagnostic('ready');
-    return async () => {
-      await stop();
-      await coordinator.dispose();
-      await manager.dispose();
-    };
-  });
+  const start = async (runtimeCtx: Context) => {
+    const workspace = config.workspaceTitle
+      ? await runtimeCtx.workspaceRegistry.create(config.workspaceRoot, config.workspaceTitle)
+      : undefined;
+    if (workspace && workspace.title !== config.workspaceTitle)
+      await workspace.setTitle(config.workspaceTitle!);
+    const runtime = new DshDesktopRuntime(runtimeCtx, config.allowedTools, config.maxOutputBytes, workspace);
+    const manager = new TaskManager(
+      config,
+      runtime,
+      compatibility,
+    );
+    const coordinator = new Coordinator(config, runtime);
+    await runtimeCtx.effect(async () => {
+      const stop = await startBridge(config, manager, coordinator);
+      return async () => {
+        await stop();
+        await coordinator.dispose();
+        await manager.dispose();
+      };
+    });
+  };
+  // WorkspaceRegistry is optional for existing installations, but mandatory
+  // and lifecycle-tracked when grouping is explicitly configured.
+  if (config.workspaceTitle) await ctx.inject(['workspaceRegistry'], start);
+  else await start(ctx);
 }
