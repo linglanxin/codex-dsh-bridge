@@ -11,6 +11,6 @@ activation.json
 ready.json
 package-result.json
 *.tgz
-!plugins/dsh-desktop/desktop/dsh-desktop-mcp-bridge-0.2.1-rc3-windows.5.tgz
+!plugins/dsh-desktop/desktop/dsh-desktop-mcp-bridge-0.2.1-rc3-windows.6.tgz
 .DS_Store
 publish-checks.txt

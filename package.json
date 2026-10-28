@@ -1,6 +1,6 @@
 {
   "name": "dsh-desktop-mcp-bridge",
-  "version": "0.2.1-rc3-windows.5",
+  "version": "0.2.1-rc3-windows.6",
   "description": "Unofficial, opt-in MCP bridge to an existing official DeepSeek Harness Desktop runtime",
   "type": "module",
   "license": "MIT",

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "dsh-desktop",
-  "version": "0.2.1-rc3-windows.5",
+  "version": "0.2.1-rc3-windows.6",
   "description": "Delegate to an already running official DeepSeek Harness Desktop through a private local bridge.",
   "author": {
     "name": "DSH Desktop MCP Bridge contributors"

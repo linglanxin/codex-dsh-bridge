@@ -8,16 +8,18 @@ import { fail } from './errors.ts';
 let windowsSid: string | undefined;
 const windowsAclCache = new Map<string, number>();
 function currentWindowsSid(): string {
-  return windowsSid ??= execFileSync('whoami.exe', ['/user', '/fo', 'csv', '/nh'], { encoding: 'utf8', windowsHide: true }).match(/S-1-5-[0-9-]+/)?.[0] ?? fail('UNSAFE_PATH', 'Cannot resolve current Windows identity.');
+  return windowsSid ??= execFileSync('whoami.exe', ['/user', '/fo', 'csv', '/nh'], { encoding: 'utf8', windowsHide: true, timeout: 10000 }).match(/S-1-5-[0-9-]+/)?.[0] ?? fail('UNSAFE_PATH', 'Cannot resolve current Windows identity.');
 }
 function secureWindowsDirectory(path: string) {
   if (process.platform !== 'win32') return;
-  execFileSync('icacls.exe', [path, '/inheritance:r', '/grant:r', `*${currentWindowsSid()}:(OI)(CI)F`, '*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F'], { windowsHide: true, stdio: 'pipe' });
+  execFileSync('icacls.exe', [path, '/inheritance:r', '/grant:r', `*${currentWindowsSid()}:(OI)(CI)F`, '*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F'], { windowsHide: true, stdio: 'pipe', timeout: 10000 });
 }
 function verifyWindowsAcl(path: string, changed: number) {
   if (process.platform !== 'win32' || windowsAclCache.get(path) === changed) return;
-  const script = `$ErrorActionPreference='Stop'; $acl=Get-Acl -LiteralPath $env:DSH_BRIDGE_ACL_PATH; $allowed=@('${currentWindowsSid()}','S-1-5-18','S-1-5-32-544'); foreach($rule in $acl.Access){ if($rule.AccessControlType -eq 'Allow' -and $rule.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value -notin $allowed){ throw 'Bridge path has permissions for other accounts' } }; 'OK'`;
-  try { execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { encoding: 'utf8', windowsHide: true, env: { ...process.env, PSModulePath: join(process.env.SystemRoot ?? 'C:/Windows', 'System32/WindowsPowerShell/v1.0/Modules'), DSH_BRIDGE_ACL_PATH: path }, stdio: 'pipe' }); }
+  // Read raw SIDs; the Access property translates them to account names and
+  // back, which can stall on domain lookups in a filtered MCP environment.
+  const script = `$ErrorActionPreference='Stop'; $acl=Get-Acl -LiteralPath $env:DSH_BRIDGE_ACL_PATH; $allowed=@('${currentWindowsSid()}','S-1-5-18','S-1-5-32-544'); foreach($rule in $acl.GetAccessRules($true,$true,[System.Security.Principal.SecurityIdentifier])){ if($rule.AccessControlType -eq 'Allow' -and $rule.IdentityReference.Value -notin $allowed){ throw 'Bridge path has permissions for other accounts' } }; 'OK'`;
+  try { execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { encoding: 'utf8', windowsHide: true, timeout: 10000, env: { ...process.env, PSModulePath: join(process.env.SystemRoot ?? 'C:/Windows', 'System32/WindowsPowerShell/v1.0/Modules'), DSH_BRIDGE_ACL_PATH: path }, stdio: 'pipe' }); }
   catch { fail('UNSAFE_PATH', 'Windows bridge state must be private to this account, SYSTEM and Administrators.'); }
   windowsAclCache.set(path, changed);
 }

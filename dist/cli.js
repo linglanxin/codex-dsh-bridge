@@ -35,17 +35,17 @@ function publicError(error) {
 var windowsSid;
 var windowsAclCache = /* @__PURE__ */ new Map();
 function currentWindowsSid() {
-  return windowsSid ??= execFileSync("whoami.exe", ["/user", "/fo", "csv", "/nh"], { encoding: "utf8", windowsHide: true }).match(/S-1-5-[0-9-]+/)?.[0] ?? fail("UNSAFE_PATH", "Cannot resolve current Windows identity.");
+  return windowsSid ??= execFileSync("whoami.exe", ["/user", "/fo", "csv", "/nh"], { encoding: "utf8", windowsHide: true, timeout: 1e4 }).match(/S-1-5-[0-9-]+/)?.[0] ?? fail("UNSAFE_PATH", "Cannot resolve current Windows identity.");
 }
 function secureWindowsDirectory(path) {
   if (process.platform !== "win32") return;
-  execFileSync("icacls.exe", [path, "/inheritance:r", "/grant:r", `*${currentWindowsSid()}:(OI)(CI)F`, "*S-1-5-18:(OI)(CI)F", "*S-1-5-32-544:(OI)(CI)F"], { windowsHide: true, stdio: "pipe" });
+  execFileSync("icacls.exe", [path, "/inheritance:r", "/grant:r", `*${currentWindowsSid()}:(OI)(CI)F`, "*S-1-5-18:(OI)(CI)F", "*S-1-5-32-544:(OI)(CI)F"], { windowsHide: true, stdio: "pipe", timeout: 1e4 });
 }
 function verifyWindowsAcl(path, changed) {
   if (process.platform !== "win32" || windowsAclCache.get(path) === changed) return;
-  const script = `$ErrorActionPreference='Stop'; $acl=Get-Acl -LiteralPath $env:DSH_BRIDGE_ACL_PATH; $allowed=@('${currentWindowsSid()}','S-1-5-18','S-1-5-32-544'); foreach($rule in $acl.Access){ if($rule.AccessControlType -eq 'Allow' -and $rule.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value -notin $allowed){ throw 'Bridge path has permissions for other accounts' } }; 'OK'`;
+  const script = `$ErrorActionPreference='Stop'; $acl=Get-Acl -LiteralPath $env:DSH_BRIDGE_ACL_PATH; $allowed=@('${currentWindowsSid()}','S-1-5-18','S-1-5-32-544'); foreach($rule in $acl.GetAccessRules($true,$true,[System.Security.Principal.SecurityIdentifier])){ if($rule.AccessControlType -eq 'Allow' -and $rule.IdentityReference.Value -notin $allowed){ throw 'Bridge path has permissions for other accounts' } }; 'OK'`;
   try {
-    execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")], { encoding: "utf8", windowsHide: true, env: { ...process.env, PSModulePath: join(process.env.SystemRoot ?? "C:/Windows", "System32/WindowsPowerShell/v1.0/Modules"), DSH_BRIDGE_ACL_PATH: path }, stdio: "pipe" });
+    execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")], { encoding: "utf8", windowsHide: true, timeout: 1e4, env: { ...process.env, PSModulePath: join(process.env.SystemRoot ?? "C:/Windows", "System32/WindowsPowerShell/v1.0/Modules"), DSH_BRIDGE_ACL_PATH: path }, stdio: "pipe" });
   } catch {
     fail("UNSAFE_PATH", "Windows bridge state must be private to this account, SYSTEM and Administrators.");
   }
@@ -371,7 +371,7 @@ var compatibility_default = [
 ];
 
 // src/version.ts
-var BRIDGE_VERSION = "0.2.1-rc3-windows.5";
+var BRIDGE_VERSION = "0.2.1-rc3-windows.6";
 var SUPPORTED_DESKTOPS = compatibility_default;
 var DESKTOP_TARGET = SUPPORTED_DESKTOPS.at(-1).desktop;
 var CORDIS_TARGET = SUPPORTED_DESKTOPS.at(-1).cordis;
