@@ -17,18 +17,23 @@ test('built MCP stdio exchanges official protocol with a separate client and exi
   });
   const client = new Client({ name: 'bridge-integration-test', version: '1.0.0' });
   let stderr = '';
+  let stage = 'connect';
   transport.stderr?.on('data', (d) => {
     stderr += d;
   });
   t.after(async () => {
+    t.diagnostic(`MCP_STAGE ${stage}`);
+    if (stderr) t.diagnostic(`MCP_STDERR ${stderr.replaceAll(f.token, '[redacted]').slice(-12000)}`);
     await client.close();
     await stop();
     await f.cleanup();
   });
   await client.connect(transport);
+  stage = 'listTools';
   const tools = await client.listTools();
   assert.equal(tools.tools.length, 19);
   const call = async (name: string, args: Record<string, unknown>) => {
+    stage = name;
     const result = await client.callTool({ name, arguments: args });
     assert.equal(result.isError, undefined);
     const content = result.content as { type: string; text: string }[];
@@ -51,5 +56,6 @@ test('built MCP stdio exchanges official protocol with a separate client and exi
     true,
   );
   await call('dsh_close_session', { sessionId: session.sessionId });
+  stage = 'completed';
   assert.doesNotMatch(stderr, new RegExp(f.token));
 });

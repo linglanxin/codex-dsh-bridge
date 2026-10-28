@@ -22,26 +22,32 @@ test('relocated portable plugin works without node_modules and can complete setu
   const args = mcp.args.map((arg: string) => arg.replaceAll('${PLUGIN_ROOT}', plugin));
   args.push('stdio', '--config', configFile);
   const client = new Client({ name: 'relocated-portable-plugin-test', version: '1' });
+  let stage = 'connect';
+  let stderr = '';
   let stop: (() => Promise<void>) | undefined;
   let manager: TaskManager | undefined;
   t.after(async () => {
+    t.diagnostic(`MCP_STAGE ${stage}`);
+    if (stderr) t.diagnostic(`MCP_STDERR ${stderr.slice(-12000)}`);
     await client.close();
     await stop?.();
     await manager?.dispose();
     await rm(root, { recursive: true, force: true });
   });
   await assert.rejects(lstat(join(plugin, 'node_modules')));
-  await client.connect(
-    new StdioClientTransport({
+  const transport = new StdioClientTransport({
       command: process.execPath,
       args,
       cwd: mcp.cwd.replaceAll('${PLUGIN_ROOT}', plugin),
       stderr: 'pipe',
-    }),
-  );
+    });
+  transport.stderr?.on('data', data => { stderr += data; });
+  await client.connect(transport);
+  stage = 'listTools';
   assert.equal((await client.listTools()).tools.length, 19);
   const text = (r: Awaited<ReturnType<typeof client.callTool>>) =>
     JSON.parse((r.content as { text: string }[])[0]!.text);
+  stage = 'setupInfoBefore';
   const before = text(await client.callTool({ name: 'dsh_setup_info', arguments: {} }));
   assert.equal(before.configuration.valid, false);
   const manifest = JSON.parse(await readFile(join(plugin, 'plugin.json'), 'utf8'));
@@ -52,6 +58,7 @@ test('relocated portable plugin works without node_modules and can complete setu
     true,
   );
   const launcher = join(plugin, 'scripts/start.mjs');
+  stage = 'setup';
   const setup = await promisify(execFile)(process.execPath, [
     launcher,
     'setup',
@@ -71,7 +78,9 @@ test('relocated portable plugin works without node_modules and can complete setu
   const config = await loadConfig(configFile);
   manager = new TaskManager(config, new FakeRuntime());
   stop = await startBridge(config, manager);
+  stage = 'connectionInfo';
   const connected = await client.callTool({ name: 'dsh_connection_info', arguments: {} });
   assert.equal(connected.isError, undefined);
   assert.equal(text(connected).runtime, 'existing-desktop');
+  stage = 'completed';
 });
