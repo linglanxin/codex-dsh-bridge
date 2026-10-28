@@ -14,6 +14,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --ignore-scripts
+      - name: Diagnose Windows permission subprocess environment
+        run: node scripts/diagnose-windows-acl.mjs
       - name: Run checks with bounded failure diagnostics
         shell: pwsh
         run: |
