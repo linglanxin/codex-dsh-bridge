@@ -14,4 +14,16 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm run check
+      - name: Run checks with bounded failure diagnostics
+        shell: pwsh
+        run: |
+          npm run check 2>&1 | Tee-Object -Variable checkOutput
+          $checkExit = $LASTEXITCODE
+          if ($checkExit -ne 0) {
+            $diagnostics = $checkOutput | Where-Object { "$_" -match 'MCP_CHILD|MCP_STAGE' } | Select-Object -Last 30
+            foreach ($line in $diagnostics) {
+              $message = "$line".Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+              Write-Output "::error title=Bridge subprocess diagnostic::$message"
+            }
+          }
+          exit $checkExit
