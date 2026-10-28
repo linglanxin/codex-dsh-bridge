@@ -3,6 +3,7 @@ import { lstat, mkdir, open, realpath } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { randomBytes, createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { hostname } from 'node:os';
 import { z } from 'zod';
 import { fail } from './errors.ts';
 let windowsSid: string | undefined;
@@ -16,10 +17,23 @@ function secureWindowsDirectory(path: string) {
 }
 function verifyWindowsAcl(path: string, changed: number) {
   if (process.platform !== 'win32' || windowsAclCache.get(path) === changed) return;
+  const systemRoot = process.env.SystemRoot ?? 'C:/Windows';
+  // MCP launches intentionally inherit a reduced environment. PowerShell also
+  // needs Windows bootstrap variables that are outside the SDK's allowlist.
+  const env = {
+    ...process.env,
+    SystemRoot: systemRoot,
+    WINDIR: process.env.WINDIR ?? systemRoot,
+    ComSpec: process.env.ComSpec ?? join(systemRoot, 'System32/cmd.exe'),
+    COMPUTERNAME: process.env.COMPUTERNAME ?? hostname(),
+    OS: process.env.OS ?? 'Windows_NT',
+    PSModulePath: join(systemRoot, 'System32/WindowsPowerShell/v1.0/Modules'),
+    DSH_BRIDGE_ACL_PATH: path,
+  };
   // Read raw SIDs; the Access property translates them to account names and
   // back, which can stall on domain lookups in a filtered MCP environment.
   const script = `$ErrorActionPreference='Stop'; $acl=Get-Acl -LiteralPath $env:DSH_BRIDGE_ACL_PATH; $allowed=@('${currentWindowsSid()}','S-1-5-18','S-1-5-32-544'); foreach($rule in $acl.GetAccessRules($true,$true,[System.Security.Principal.SecurityIdentifier])){ if($rule.AccessControlType -eq 'Allow' -and $rule.IdentityReference.Value -notin $allowed){ throw 'Bridge path has permissions for other accounts' } }; 'OK'`;
-  try { execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { encoding: 'utf8', windowsHide: true, timeout: 10000, env: { ...process.env, PSModulePath: join(process.env.SystemRoot ?? 'C:/Windows', 'System32/WindowsPowerShell/v1.0/Modules'), DSH_BRIDGE_ACL_PATH: path }, stdio: 'pipe' }); }
+  try { execFileSync(join(systemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { encoding: 'utf8', windowsHide: true, timeout: 10000, env, stdio: 'pipe' }); }
   catch { fail('UNSAFE_PATH', 'Windows bridge state must be private to this account, SYSTEM and Administrators.'); }
   windowsAclCache.set(path, changed);
 }
