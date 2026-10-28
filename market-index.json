@@ -38,16 +38,16 @@
         ]
       },
       "dist-tags": {
-        "next": "0.2.1-rc3-windows.5"
+        "next": "0.2.1-rc3-windows.6"
       },
       "versions": [
         {
-          "version": "0.2.1-rc3-windows.5",
-          "publishTimestamp": 1793114275,
+          "version": "0.2.1-rc3-windows.6",
+          "publishTimestamp": 1793177078,
           "source": {
             "type": "git",
             "url": "https://github.com/linglanxin/codex-dsh-bridge",
-            "commit": "35040de6f5ab2bf47cbaacd062114b48229a5da1"
+            "commit": "8ea8e0a54bc5e96d9c30102d5fcc28ac9ab661d8"
           },
           "engines": {
             "dsh": "0.2.1-rc.3"
