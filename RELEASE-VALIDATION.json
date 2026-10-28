@@ -1,9 +1,14 @@
 {
-  "version": "0.2.1-rc3-windows.5",
-  "date": "2026-10-27",
+  "version": "0.2.1-rc3-windows.6",
+  "date": "2026-10-28",
   "automatedChecks": {
     "passed": 37,
     "failed": 0
+  },
+  "hostedAutomatedChecks": {
+    "passed": 37,
+    "failed": 0,
+    "url": "https://github.com/linglanxin/codex-dsh-bridge/actions/runs/40658467500"
   },
   "productionInstall": "passed with lifecycle scripts disabled",
   "privateConfigurationSetup": "passed in an isolated verification directory",

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1-rc3-windows.6 — 2026-10-28
+
+- Fix Windows MCP connection timeouts by reading DACLs through .NET instead of Get-Acl.
+- Keep raw SID allow checks and bound permission-check subprocesses to 10 seconds.
+- Retain cross-process MCP and foreign-account permission-denial regressions.
+- Upgrade and pin GitHub Actions to Node 24 runtimes, removing Node 20 deprecation warnings.
+- Confirm all 37 checks on the hosted Windows runner and refresh release/install artifacts.
+
 ## 0.2.1-rc3-windows.5 — 2026-10-27
 
 - Publish the Windows supervised workflow and named workspace routing.

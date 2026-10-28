@@ -22,8 +22,10 @@ test('built MCP stdio exchanges official protocol with a separate client and exi
     stderr += d;
   });
   t.after(async () => {
-    t.diagnostic(`MCP_STAGE ${stage}`);
-    if (stderr) t.diagnostic(`MCP_STDERR ${stderr.replaceAll(f.token, '[redacted]').slice(-12000)}`);
+    if (stage !== 'completed') {
+      t.diagnostic(`MCP_STAGE ${stage}`);
+      if (stderr) t.diagnostic(`MCP_STDERR ${stderr.replaceAll(f.token, '[redacted]').slice(-12000)}`);
+    }
     await client.close();
     await stop();
     await f.cleanup();

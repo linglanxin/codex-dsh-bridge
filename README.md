@@ -6,7 +6,7 @@
 
 ## 安装与市场发现
 
-当前公开预发布版本为 **0.2.1-rc3-windows.5**。安装包、官方格式索引与跨电脑配置步骤见 [市场安装说明](docs/MARKETPLACE.md)。本项目为社区插件；索引可供 DSH 加载，不代表官方审核收录。
+当前公开预发布版本为 **0.2.1-rc3-windows.6**。安装包、官方格式索引与跨电脑配置步骤见 [市场安装说明](docs/MARKETPLACE.md)。本项目为社区插件；索引可供 DSH 加载，不代表官方审核收录。
 
 ## 已实现
 
@@ -25,6 +25,8 @@
 ```
 
 ## 当前验证范围
+
+修复版 windows.6 已通过本机及 GitHub Windows / Node.js 24.22.1 的 37 项检查，见 [通过记录](https://github.com/linglanxin/codex-dsh-bridge/actions/runs/40658467500)。原来两项 MCP 超时来自精简环境中的 Get-Acl 阻塞，现改用 .NET 直接读取 DACL。
 
 本机实测：Windows，DSH Desktop **0.2.1-rc.3**，桥接 **0.2.1-rc3-windows.4**，Cordis 4.0.5，Schemastery 3.18.5。
 

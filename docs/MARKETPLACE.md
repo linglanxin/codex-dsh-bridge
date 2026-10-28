@@ -7,15 +7,18 @@ DSH 官方目前没有统一的插件上传中心。官方推荐为仓库添加 
 - 官方发现方式：https://github.com/deepseek-ai/deepseek-harness#community-and-support
 - 官方索引规范：https://github.com/deepseek-ai/deepseek-harness/blob/master/.agents/notes/implemented/feature/2026-10-02-plugin-market-index-format.md
 - 市场索引：https://raw.githubusercontent.com/linglanxin/codex-dsh-bridge/main/market-index.json
-- 预发布下载：https://github.com/linglanxin/codex-dsh-bridge/releases/tag/v0.2.1-rc3-windows.5
+- 预发布下载：https://github.com/linglanxin/codex-dsh-bridge/releases/tag/v0.2.1-rc3-windows.6
 
 ## 兼容范围
 
-本次市场版本明确限定 **DSH Desktop 0.2.1-rc.3 / Cordis 4.0.5 / Schemastery 3.18.5，Windows，Node.js 22.19+**。其他版本不要强行跳过兼容性检查。历史实机验证使用 windows.3 / windows.4；windows.5 在同一受控运行时完成自动检查和独立安装验证，不宣称做过新的真实模型联调。
+本次市场版本明确限定 **DSH Desktop 0.2.1-rc.3 / Cordis 4.0.5 / Schemastery 3.18.5，Windows，Node.js 22.19+**。其他版本不要强行跳过兼容性检查。历史实机验证使用 windows.3 / windows.4；windows.6 完成自动检查和独立安装验证，不宣称做过新的真实模型联调。
 
-## 当前验证差异
+## 已修复的 Windows CI 超时
 
-本机使用 Node.js **24.19.0**，37 项检查通过。GitHub Windows runner 使用 **24.22.1** 时，35 项通过、2 项 MCP stdio 集成检查超时，原因尚未定位：[检查记录](https://github.com/linglanxin/codex-dsh-bridge/actions/runs/40529728931)。目前保留预发布状态；优先使用已验证的 Node.js 24.19.0。新电脑上的实际 DSH 连接仍需运行 doctor 确认。
+windows.5 的两项 MCP 集成检查曾在 GitHub runner 超时。根因是 Get-Acl 在 MCP SDK 精简后的子进程环境中阻塞，并非已证实的 Node 版本不兼容。windows.6 改用 .NET 直接读取 DACL 和原始 SID，权限检查命令设有 10 秒上限，继续拒绝其他账户可读的状态文件。
+
+本机 Node.js 24.19.0 和 GitHub Windows / Node.js 24.22.1 的 37 项检查均已通过：[云端记录](https://github.com/linglanxin/codex-dsh-bridge/actions/runs/40658467500)。新电脑上的真实 DSH 连接仍需运行 doctor 确认；本次没有新增真实模型联调。
+
 ## 从市场索引安装
 
 在支持自定义索引的 DSH 市场“索引源”中添加上面的 `market-index.json` URL，再选择此插件的 `next` 版本。索引使用确切 Git 提交，仓库包含构建产物，安装无需运行构建脚本。
@@ -33,7 +36,7 @@ dsh plugin --profile desktop add <下载的 .tgz 的完整路径>
 市场安装的是 DSH 侧插件。MCP 客户端还需要桥接命令，可从同一份 Release 安装：
 
 ```text
-npm install --global https://github.com/linglanxin/codex-dsh-bridge/releases/download/v0.2.1-rc3-windows.5/dsh-desktop-mcp-bridge-0.2.1-rc3-windows.5.tgz --ignore-scripts
+npm install --global https://github.com/linglanxin/codex-dsh-bridge/releases/download/v0.2.1-rc3-windows.6/dsh-desktop-mcp-bridge-0.2.1-rc3-windows.6.tgz --ignore-scripts
 dsh-desktop-mcp setup
 ```
 

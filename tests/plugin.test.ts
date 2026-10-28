@@ -27,8 +27,10 @@ test('relocated portable plugin works without node_modules and can complete setu
   let stop: (() => Promise<void>) | undefined;
   let manager: TaskManager | undefined;
   t.after(async () => {
-    t.diagnostic(`MCP_STAGE ${stage}`);
-    if (stderr) t.diagnostic(`MCP_STDERR ${stderr.slice(-12000)}`);
+    if (stage !== 'completed') {
+      t.diagnostic(`MCP_STAGE ${stage}`);
+      if (stderr) t.diagnostic(`MCP_STDERR ${stderr.slice(-12000)}`);
+    }
     await client.close();
     await stop?.();
     await manager?.dispose();
