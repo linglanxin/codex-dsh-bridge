@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { cp, mkdtemp, realpath, rm, readFile, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -37,7 +38,7 @@ test('relocated portable plugin works without node_modules and can complete setu
   await assert.rejects(lstat(join(plugin, 'node_modules')));
   const transport = new StdioClientTransport({
       command: process.execPath,
-      args,
+      args: ['--import', fileURLToPath(new URL('./trace-child.mjs', import.meta.url)), ...args],
       cwd: mcp.cwd.replaceAll('${PLUGIN_ROOT}', plugin),
       stderr: 'pipe',
     });
