@@ -12,7 +12,7 @@ test('built MCP stdio exchanges official protocol with a separate client and exi
   const stop = await startBridge(f.config, f.manager);
   const transport = new StdioClientTransport({
     command: process.execPath,
-    args: ['--import', fileURLToPath(new URL('./trace-child.mjs', import.meta.url)), fileURLToPath(new URL('../dist/cli.js', import.meta.url)), 'stdio', '--config', f.file],
+    args: ['--import', new URL('./trace-child.mjs', import.meta.url).href, fileURLToPath(new URL('../dist/cli.js', import.meta.url)), 'stdio', '--config', f.file],
     stderr: 'pipe',
   });
   const client = new Client({ name: 'bridge-integration-test', version: '1.0.0' });
