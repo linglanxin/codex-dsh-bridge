@@ -9,7 +9,6 @@ import { lstat, mkdir, open, realpath } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { randomBytes, createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { hostname } from "node:os";
 import { z } from "zod";
 
 // src/errors.ts
@@ -47,17 +46,12 @@ function verifyWindowsAcl(path, changed) {
   const systemRoot = process.env.SystemRoot ?? "C:/Windows";
   const env = {
     ...process.env,
-    SystemRoot: systemRoot,
-    WINDIR: process.env.WINDIR ?? systemRoot,
-    ComSpec: process.env.ComSpec ?? join(systemRoot, "System32/cmd.exe"),
-    COMPUTERNAME: process.env.COMPUTERNAME ?? hostname(),
-    OS: process.env.OS ?? "Windows_NT",
     PSModulePath: join(systemRoot, "System32/WindowsPowerShell/v1.0/Modules"),
     DSH_BRIDGE_ACL_PATH: path
   };
-  const script = `$ErrorActionPreference='Stop'; $acl=Get-Acl -LiteralPath $env:DSH_BRIDGE_ACL_PATH; $allowed=@('${currentWindowsSid()}','S-1-5-18','S-1-5-32-544'); foreach($rule in $acl.GetAccessRules($true,$true,[System.Security.Principal.SecurityIdentifier])){ if($rule.AccessControlType -eq 'Allow' -and $rule.IdentityReference.Value -notin $allowed){ throw 'Bridge path has permissions for other accounts' } }; 'OK'`;
+  const script = `$ErrorActionPreference='Stop'; $sections=[System.Security.AccessControl.AccessControlSections]::Access; if([System.IO.Directory]::Exists($env:DSH_BRIDGE_ACL_PATH)){ $acl=[System.IO.Directory]::GetAccessControl($env:DSH_BRIDGE_ACL_PATH,$sections) }else{ $acl=[System.IO.File]::GetAccessControl($env:DSH_BRIDGE_ACL_PATH,$sections) }; $allowed=@('${currentWindowsSid()}','S-1-5-18','S-1-5-32-544'); foreach($rule in $acl.GetAccessRules($true,$true,[System.Security.Principal.SecurityIdentifier])){ if($rule.AccessControlType -eq 'Allow' -and $rule.IdentityReference.Value -notin $allowed){ throw 'Bridge path has permissions for other accounts' } }; 'OK'; exit 0`;
   try {
-    execFileSync(join(systemRoot, "System32/WindowsPowerShell/v1.0/powershell.exe"), ["-NoProfile", "-NonInteractive", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")], { encoding: "utf8", windowsHide: true, timeout: 1e4, env, stdio: "pipe" });
+    execFileSync(join(systemRoot, "System32/WindowsPowerShell/v1.0/powershell.exe"), ["-NoProfile", "-NonInteractive", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")], { encoding: "utf8", windowsHide: true, timeout: 1e4, env, stdio: ["ignore", "pipe", "pipe"] });
   } catch {
     fail("UNSAFE_PATH", "Windows bridge state must be private to this account, SYSTEM and Administrators.");
   }
