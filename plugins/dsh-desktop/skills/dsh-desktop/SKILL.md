@@ -11,6 +11,10 @@ Call dsh_setup_info for private configuration and staged adapter information, th
 
 When connection information includes workspaceTitle, new workers join that Desktop workspace. Their files remain in separate task directories. Use the configured title without silently changing it.
 
+For a custom configuration, set `DSH_DESKTOP_BRIDGE_CONFIG` explicitly before using the source checkout's `dist/call.js` fallback. Otherwise it selects the current account's default state directory, which may differ from the configured Desktop plugin. Restricted shell environments may also lack named-pipe access; prefer MCP tools or use the normal approval mechanism for the authorized fallback.
+
+On Windows, `UNSAFE_PATH` can refer to the task workspace as well as private state. Use the source checkout's `scripts/check-windows-workspace.ps1` (relative to this plugin) with an explicit `-ConfigFile` for read-only inspection. Repair requires a separately reviewed SID, `-Repair`, a private state/config and a stopped Desktop/bridge owner. It backs up permissions and removes only matching explicit workspace grants; it does not loosen checks, stop Desktop or inspect tokens. Never choose a SID automatically or claim the external source of recurring grants has been eliminated. See the repository's Windows workspace troubleshooting guide for commands and scope.
+
 ## Supervise a task
 
 - Prefer dsh_job_start over raw submission. Provide a UUID requestId, bounded objective and concrete acceptance criteria. Preserve the job ID, directory and event cursor. After uncertain submission, retry the same request ID rather than creating another job.

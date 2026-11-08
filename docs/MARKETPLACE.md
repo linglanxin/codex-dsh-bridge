@@ -11,13 +11,13 @@ DSH 官方目前没有统一的插件上传中心。官方推荐为仓库添加 
 
 ## 兼容范围
 
-本次市场版本明确限定 **DSH Desktop 0.2.1-rc.3 / Cordis 4.0.5 / Schemastery 3.18.5，Windows，Node.js 22.19+**。其他版本不要强行跳过兼容性检查。历史实机验证使用 windows.3 / windows.4；windows.6 完成自动检查和独立安装验证，不宣称做过新的真实模型联调。
+本次市场版本明确限定 **DSH Desktop 0.2.1-rc.3 / Cordis 4.0.5 / Schemastery 3.18.5，Windows，Node.js 22.19+**。其他版本不要强行跳过兼容性检查。windows.6 已在 2026-10-31 与 2026-11-08 完成真实 Desktop 的提问、计划审批、写入和独立验收，详见[本轮验证记录](verification/2026-11-08-windows.md)。历史返工联调使用 windows.3 / windows.4。
 
 ## 已修复的 Windows CI 超时
 
 windows.5 的两项 MCP 集成检查曾在 GitHub runner 超时。根因是 Get-Acl 在 MCP SDK 精简后的子进程环境中阻塞，并非已证实的 Node 版本不兼容。windows.6 改用 .NET 直接读取 DACL 和原始 SID，权限检查命令设有 10 秒上限，继续拒绝其他账户可读的状态文件。
 
-本机 Node.js 24.19.0 和 GitHub Windows / Node.js 24.22.1 的 37 项检查均已通过：[云端记录](https://github.com/linglanxin/codex-dsh-bridge/actions/runs/40658467500)。新电脑上的真实 DSH 连接仍需运行 doctor 确认；本次没有新增真实模型联调。
+windows.6 发布时，本机 Node.js 24.19.0 和 GitHub Windows / Node.js 24.22.1 的 37 项检查均已通过：[云端记录](https://github.com/linglanxin/codex-dsh-bridge/actions/runs/40658467500)。新电脑上的真实 DSH 连接仍需运行 doctor 确认。
 
 ## 从市场索引安装
 
@@ -43,6 +43,8 @@ dsh-desktop-mcp setup
 默认配置是当前用户主目录下的 `.dsh-mcp-state/config.json`；任务成果放在 `.dsh-mcp-work`。这些是各自电脑的目录，不使用作者的盘符。若需要自定义目录，给 `setup` 同时传入 `--state-dir` 和 `--workspace-root`，并在 DSH 插件配置 `configFile` 中填写生成的完整配置文件路径；MCP 命令也使用相同的 `--config`。
 
 MCP 客户端启动命令设为 `dsh-desktop-mcp`，参数为 `stdio`。另开终端运行 `dsh-desktop-mcp doctor` 验证与已运行 Desktop 的连接。
+
+使用自定义配置时，`stdio` 和 `doctor` 都要指定同一份 `--config`。从源码使用 `dist/call.js` 备用入口时，先设置 `DSH_DESKTOP_BRIDGE_CONFIG`；该入口不继承其他 MCP 进程命令行中的 `--config`。连接问题与目录权限预检见[Windows 工作区排查](WINDOWS-WORKSPACE.md)。
 
 如需按工作区收纳，在私有配置 JSON 中添加 `"workspaceTitle": "codex自动"`，保留 `allowedTools: []`，重新加载插件。新任务会话进入该工作区，文件继续放在各任务子目录。
 

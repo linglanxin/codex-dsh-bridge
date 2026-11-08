@@ -28,11 +28,13 @@
 
 修复版 windows.6 已通过本机及 GitHub Windows / Node.js 24.22.1 的 37 项检查，见 [通过记录](https://github.com/linglanxin/codex-dsh-bridge/actions/runs/40658467500)。原来两项 MCP 超时来自精简环境中的 Get-Acl 阻塞，现改用 .NET 直接读取 DACL。
 
-本机实测：Windows，DSH Desktop **0.2.1-rc.3**，桥接 **0.2.1-rc3-windows.4**，Cordis 4.0.5，Schemastery 3.18.5。
+本机最新实测：Windows，DSH Desktop **0.2.1-rc.3**，桥接 **0.2.1-rc3-windows.6**，Cordis 4.0.5，Schemastery 3.18.5。
 
-- 37 项自动检查通过（含新增的工作区归属与失败处理检查）。
+2026-11-08 已复验全新 MCP 连接及真实提问、计划审批、写入和独立验收，并核对工作区归属、运行文件完整性。发现任务目录额外授权再次出现，修正后恢复；尚未确认重新授权的具体进程。见[验证记录](docs/verification/2026-11-08-windows.md)及[Windows 权限预检](docs/WINDOWS-WORKSPACE.md)。本次仓库更新增加排查工具与说明，运行版本仍为 windows.6。
+
+- windows.6 发布时 37 项自动检查通过；本轮源码新增 3 项 Windows 权限预检回归，完整检查共 40 项通过。
 - 真实模型完成“提问 → 答复 → 计划审查 → 写文件 → 验收”。
-- 真实模型完成同一会话中的“初稿 → 退回修改 → 复验通过”。
+- 历史 windows.3 / windows.4 真实模型联调完成同一会话中的“初稿 → 退回修改 → 复验通过”。
 - DSH 实机创建 `codex自动` 工作区，通过桥接新建会话并核实持久化归属，见 [工作区验证](WORKSPACE-VERIFICATION.json)。此项验证无需调用模型。
 
 详见 [验证结果](验证结果.md)、[兼容性核对](兼容性核对.md) 和两份 `LIVE-*.json` 记录。受控测试与真实模型联调在记录中分别标明；尚未做长期稳定性验证。

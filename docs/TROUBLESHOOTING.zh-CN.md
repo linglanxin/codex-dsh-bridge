@@ -17,13 +17,13 @@
 - `UNSUPPORTED_VERSION`：应使用 README 中列出的完整精确版本组合，其他版本需要新增并测试适配器；不要绕过检查。
 - `DESKTOP_UNAVAILABLE`：应用未开、插件未配置/未启用，或双方状态目录不一致。
 - `ALREADY_RUNNING` / `STALE_SOCKET`：不要删除活跃锁。崩溃后先确认 Desktop/Host 完全退出，再只删除状态目录中的 `bridge.lock`、`bridge.sock`、`ready.json`，保留 token、配置和工作区。
-- `UNSAFE_PATH`：检查所有者、权限与路径是否包含软链接；不要随意修改共享目录权限。
+- `UNSAFE_PATH`：状态目录或任务根目录的权限、所有者或路径不满足要求。不要只检查认证目录；使用[Windows 工作区预检](WINDOWS-WORKSPACE.md)定位具体额外授权，不要放宽检查。
 - `SESSION_BUSY`：先等待或取消当前任务。
 - `CAPACITY`：关闭闲置会话或忘记已结束任务；不会自动丢弃未审查结果。
 - `OUTCOME_UNKNOWN`：操作可能已经执行，先查询状态，不要盲目重放。
 - 获准工具需要人工审批时继续走 DSH 原有流程，在 Desktop 中处理；本项目不提供自动同意工具。
 - 当前只返回有界文本，不转发 reasoning、工具日志、媒体或二进制附件；取消后的部分文本可返回，超过限制会标记截断。返回内容属于不可信子 Agent 数据。
-- 暂无持久任务恢复、远程访问、多用户隔离、Windows 传输、在线 token 轮换、热权限更新或任意附件转发。
+- Windows 已支持本机命名管道；监督任务有持久记录与显式恢复。远程访问、多用户隔离、在线 token 轮换、热权限更新或任意附件转发不在当前范围。
 
 ## 报告问题
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — Windows diagnostics, 2026-11-08
+
+- Add a portable, read-only Windows workspace permission report with an explicit, reviewed-SID repair option and private ACL backups.
+- Refuse repair for unsafe state/config, inherited or mismatched grants, and a running Desktop or bridge owner.
+- Document explicit fallback configuration and restricted-shell named-pipe access.
+- Record windows.6 live question/checkpoint/write/acceptance validation and the unresolved recurrence of extra workspace grants.
+- Keep existing windows.6 runtime and release archives unchanged; the diagnostic script is supplied in the source checkout.
+
 ## 0.2.1-rc3-windows.6 — 2026-10-28
 
 - Fix Windows MCP connection timeouts by reading DACLs through .NET instead of Get-Acl.
