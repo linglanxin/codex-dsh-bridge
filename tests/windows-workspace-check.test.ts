@@ -34,6 +34,24 @@ function grant(path: string, sid: string) {
     windowsHide: true,
   });
 }
+function backupSids(sddl: string): string[] {
+  const output = execFileSync(
+    powershell,
+    [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      '$descriptor = [System.Security.AccessControl.RawSecurityDescriptor]::new($env:DSH_TEST_SDDL); ConvertTo-Json -InputObject @($descriptor.DiscretionaryAcl | ForEach-Object { $_.SecurityIdentifier.Value }) -Compress',
+    ],
+    {
+      encoding: 'utf8',
+      timeout: 10000,
+      windowsHide: true,
+      env: { ...process.env, DSH_TEST_SDDL: sddl },
+    },
+  );
+  return JSON.parse(output);
+}
 
 test(
   'Windows workspace inspection is read-only and preserves private authentication',
@@ -89,14 +107,17 @@ test(
       const report = JSON.parse(repaired.stdout);
       assert.equal(report.removed, 1);
       assert.deepEqual(report.unexpectedAllowRules, []);
-      assert.match(
-        await readFile(join(report.backup, 'workspace-before.sddl'), 'utf8'),
-        new RegExp(extraSid),
+      assert.ok(
+        backupSids(await readFile(join(report.backup, 'workspace-before.sddl'), 'utf8')).includes(
+          extraSid,
+        ),
       );
-      assert.doesNotMatch(
-        await readFile(join(report.backup, 'workspace-after.sddl'), 'utf8'),
-        new RegExp(extraSid),
+      assert.ok(
+        !backupSids(await readFile(join(report.backup, 'workspace-after.sddl'), 'utf8')).includes(
+          extraSid,
+        ),
       );
+      assert.equal(check(f.file).status, 0);
     }
   },
 );
